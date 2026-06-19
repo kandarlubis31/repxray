@@ -1,6 +1,6 @@
 {
   "name": "repxray",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Scan, store, and manage project metadata from any folder. CLI + Web Dashboard + AI Agent ready.",
   "bin": {
     "repxray": "src/index.js"
