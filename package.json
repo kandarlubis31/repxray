@@ -1,0 +1,20 @@
+{
+  "name": "repxray-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Workspace root for Repxray — project intelligence system",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/<your-username>/repxray.git"
+  },
+  "bugs": {
+    "url": "https://github.com/<your-username>/repxray/issues"
+  },
+  "homepage": "https://github.com/<your-username>/repxray#readme",
+  "scripts": {
+    "server": "node cli/server/src/server.js",
+    "cli": "node cli/src/index.js",
+    "link": "cd cli && pnpm link --global",
+    "unlink": "cd cli && pnpm uninstall --global repxray"
+  }
+}

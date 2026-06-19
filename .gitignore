@@ -1,0 +1,10 @@
+node_modules/
+.vscode/
+.idea/
+*.log
+.env
+.env.local
+cli/database/repxray.sqlite
+cli/server/database/
+.DS_Store
+Thumbs.db

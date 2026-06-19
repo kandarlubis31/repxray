@@ -1,0 +1,41 @@
+{
+  "name": "repxray",
+  "version": "1.0.0",
+  "description": "Scan, store, and manage project metadata from any folder. CLI + Web Dashboard + AI Agent ready.",
+  "bin": {
+    "repxray": "src/index.js"
+  },
+  "files": [
+    "src/",
+    "server/",
+    "database/"
+  ],
+  "scripts": {
+    "start": "node src/index.js",
+    "server": "node server/src/server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "sql.js": "^1.10.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "ink": "^7.1.0",
+    "react": "^19.2.7"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/<your-username>/repxray.git"
+  },
+  "bugs": {
+    "url": "https://github.com/<your-username>/repxray/issues"
+  },
+  "homepage": "https://github.com/<your-username>/repxray#readme",
+  "keywords": [
+    "project-scanner",
+    "project-intelligence",
+    "metadata",
+    "cli",
+    "dashboard"
+  ],
+  "license": "MIT"
+}

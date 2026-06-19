@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Repxray</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- ── Header ────────────────────────────────────────── -->
+    <header id="header">
+      <div class="logo">
+        <div class="logo-mark">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a4 4 0 0 1 4 4c0 2-2 4-4 4-2 0-4-2-4-4 0-2.2 1.8-4 4-4z"/>
+            <path d="M12 10c-3.3 0-6 2.7-6 6v2h12v-2c0-3.3-2.7-6-6-6z"/>
+            <path d="M8 18v2a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2"/>
+            <path d="M7 6.5A4.5 4.5 0 0 0 3 11v1"/>
+            <path d="M17 6.5A4.5 4.5 0 0 1 21 11v1"/>
+          </svg>
+        </div>
+        <span class="logo-text">Repxray</span>
+      </div>
+
+      <div class="search-command" id="searchCommand" role="combobox" aria-expanded="false" aria-haspopup="dialog">
+        <svg class="search-command-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input type="text" id="searchInput" placeholder="Search projects, stacks, or commands..." autocomplete="off" aria-label="Search projects">
+        <div class="kbd-hint" aria-hidden="true">
+          <kbd>&#8984;</kbd><kbd>K</kbd>
+        </div>
+        <button class="btn-clear" id="clearSearch" aria-label="Clear search">&times;</button>
+      </div>
+
+      <div class="header-actions">
+        <button class="btn btn-scan" id="scanBtn" aria-label="Scan a project directory">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+          </svg>
+          <span>Scan</span>
+        </button>
+        <button class="btn btn-scan-all" id="scanAllBtn" aria-label="Scan all subdirectories">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-6l-2-2H5a2 2 0 0 0-2 2z"/>
+          </svg>
+        </button>
+        <div class="refresh-indicator" id="refreshIndicator" role="status" aria-label="Auto-refresh status">
+          <span class="refresh-dot" id="refreshDot"></span>
+          <span class="refresh-text">Auto</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ── Scan Input Bar ────────────────────────────────── -->
+    <div class="scan-bar" id="scanBar">
+      <svg class="scan-bar-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+      </svg>
+      <input type="text" id="scanPath" placeholder="Enter path to scan — e.g. ./my-project or /absolute/path" autocomplete="off" aria-label="Directory path to scan">
+      <button class="btn btn-primary" id="scanBtnBar">Scan</button>
+      <button class="btn btn-outline" id="scanAllBtnBar">Scan All</button>
+    </div>
+
+    <!-- ── Main Content ──────────────────────────────────── -->
+    <main id="main">
+      <!-- Left: Sidebar -->
+      <aside id="sidebar" role="navigation" aria-label="Project list">
+        <div class="sidebar-header">
+          <div class="sidebar-header-left">
+            <h2>Projects</h2>
+            <span class="project-count" id="projectCount" aria-label="Number of projects">0</span>
+          </div>
+          <div class="sidebar-header-right">
+            <button class="sidebar-sort" id="sortBtn" aria-label="Sort projects">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="project-stats" id="projectStats">
+          <div class="stat-item">
+            <span class="stat-value" id="statTotal">0</span>
+            <span class="stat-label">Total</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value success" id="statActive">0</span>
+            <span class="stat-label">Active</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value danger" id="statErrors">0</span>
+            <span class="stat-label">Errors</span>
+          </div>
+        </div>
+
+        <div class="project-list" id="projectList" role="listbox" aria-label="Project list">
+          <!-- Skeleton loaders injected by JS -->
+        </div>
+      </aside>
+
+      <!-- Right: Detail Panel -->
+      <section id="detail" role="region" aria-label="Project details">
+        <!-- Empty State -->
+        <div class="detail-empty" id="detailEmpty">
+          <div class="empty-illustration" aria-hidden="true">
+            <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
+              <!-- Folder shape -->
+              <path d="M15 35c0-5.5 4.5-10 10-10h25l10 10h35c5.5 0 10 4.5 10 10v40c0 5.5-4.5 10-10 10H25c-5.5 0-10-4.5-10-10V35z" fill="currentColor" opacity="0.08"/>
+              <path d="M15 35c0-5.5 4.5-10 10-10h25l10 10h35c5.5 0 10 4.5 10 10v40c0 5.5-4.5 10-10 10H25c-5.5 0-10-4.5-10-10V35z" stroke="currentColor" stroke-width="1.5" opacity="0.2"/>
+              <!-- Scan beam -->
+              <path class="scan-beam" d="M20 60h80" stroke="var(--accent)" stroke-width="2" opacity="0.6">
+                <animate attributeName="opacity" values="0.2;0.8;0.2" dur="2s" repeatCount="indefinite"/>
+                <animate attributeName="x1" values="20;80;20" dur="4s" repeatCount="indefinite"/>
+              </path>
+              <rect x="35" y="42" width="12" height="4" rx="2" fill="currentColor" opacity="0.15"/>
+              <rect x="52" y="42" width="8" height="4" rx="2" fill="currentColor" opacity="0.1"/>
+            </svg>
+          </div>
+          <h2 class="empty-title">Select a project to begin</h2>
+          <p class="empty-subtitle">Choose a project from the sidebar or scan a new directory to see its intelligence here.</p>
+          <button class="btn btn-accent" id="emptyScanBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+            </svg>
+            Scan New Directory
+          </button>
+          <p class="empty-hint">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20"/>
+            </svg>
+            Press <kbd>&#8984;</kbd><kbd>K</kbd> to search or enter a path above
+          </p>
+        </div>
+
+        <!-- Detail Content -->
+        <div class="detail-content hidden" id="detailContent">
+          <!-- Hero Header -->
+          <div class="detail-hero">
+            <div class="hero-info">
+              <h2 id="detailName"></h2>
+              <div class="hero-meta">
+                <span class="hero-id" id="detailId"></span>
+                <span class="hero-sep" aria-hidden="true">·</span>
+                <span class="hero-dir mono" id="detailDir" title="Click to copy path"></span>
+                <span class="hero-sep" aria-hidden="true">·</span>
+                <span class="hero-time" id="detailTime"></span>
+              </div>
+            </div>
+            <div class="hero-actions">
+              <button class="btn-icon" id="copyJsonBtn" aria-label="Copy JSON summary" title="Copy JSON">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="14" y="14" width="8" height="8" rx="2"/><rect x="2" y="2" width="8" height="8" rx="2"/><path d="M7 14v3a2 2 0 0 0 2 2h3"/>
+                </svg>
+              </button>
+              <button class="btn-icon" id="copyMdBtn" aria-label="Copy Markdown summary" title="Copy Markdown">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+              </button>
+              <button class="btn-icon danger" id="deleteBtn" aria-label="Delete project" title="Delete project">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="detail-body">
+            <!-- Overview Cards -->
+            <div class="overview-cards" id="overviewCards">
+              <div class="overview-card status-card">
+                <div class="overview-card-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                  </svg>
+                </div>
+                <div class="overview-card-label">Status</div>
+                <div class="overview-card-value" id="detailStatus">
+                  <span class="status-dot" id="statusDot"></span>
+                  <span id="detailStatusText"></span>
+                </div>
+              </div>
+              <div class="overview-card progress-card">
+                <div class="overview-card-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                  </svg>
+                </div>
+                <div class="overview-card-label">Progress</div>
+                <div class="overview-card-value" id="detailProgress"></div>
+                <div class="progress-track" id="progressTrack">
+                  <div class="progress-bar" id="progressBar"></div>
+                </div>
+              </div>
+              <div class="overview-card features-card">
+                <div class="overview-card-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                  </svg>
+                </div>
+                <div class="overview-card-label">Features</div>
+                <div class="overview-card-value" id="detailFeatureCount">0</div>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div class="detail-section">
+              <div class="section-header">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+                </svg>
+                <h3>Description</h3>
+              </div>
+              <p id="detailDesc" class="desc-text"></p>
+            </div>
+
+            <!-- Tech Stack -->
+            <div class="detail-section" id="stackSection">
+              <div class="section-header">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                <h3>Tech Stack</h3>
+                <span class="section-count" id="stackCount">0</span>
+              </div>
+              <div class="stack-groups" id="detailStack"></div>
+            </div>
+
+            <!-- Features -->
+            <div class="detail-section" id="featuresSection">
+              <div class="section-header">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                </svg>
+                <h3>Features</h3>
+                <span class="section-count" id="featureCount">0</span>
+              </div>
+              <ul id="detailFeatures"></ul>
+            </div>
+
+            <!-- Summary Tabs -->
+            <div class="detail-section" id="summarySection">
+              <div class="section-header">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/>
+                </svg>
+                <h3>Summary</h3>
+              </div>
+              <div class="tabs">
+                <button class="tab active" data-tab="json" role="tab" aria-selected="true">JSON</button>
+                <button class="tab" data-tab="md" role="tab" aria-selected="false">Markdown</button>
+                <button class="tab" data-tab="preview" role="tab" aria-selected="false">Preview</button>
+                <div class="tab-spacer"></div>
+                <button class="tab-copy" id="tabCopyBtn" aria-label="Copy current tab content" title="Copy">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="14" y="14" width="8" height="8" rx="2"/><rect x="2" y="2" width="8" height="8" rx="2"/><path d="M7 14v3a2 2 0 0 0 2 2h3"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="tab-panes">
+                <pre class="tab-pane active" id="summaryJson" role="tabpanel"><code></code></pre>
+                <pre class="tab-pane" id="summaryMd" role="tabpanel"><code></code></pre>
+                <div class="tab-pane" id="summaryPreview" role="tabpanel"></div>
+              </div>
+            </div>
+
+            <!-- Metadata Footer -->
+            <div class="detail-footer">
+              <div class="footer-item">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                <span>Created: <strong id="detailCreated"></strong></span>
+              </div>
+              <div class="footer-item">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"/><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"/>
+                </svg>
+                <span>Updated: <strong id="detailUpdated"></strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ── Command Palette Overlay ────────────────────────── -->
+    <div class="palette-overlay hidden" id="paletteOverlay" role="dialog" aria-modal="true" aria-label="Command palette">
+      <div class="palette">
+        <div class="palette-input-wrapper">
+          <svg class="palette-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input type="text" id="paletteInput" placeholder="Search projects or type a command..." autocomplete="off" aria-label="Command palette search">
+          <kbd class="palette-esc">ESC</kbd>
+        </div>
+        <div class="palette-results" id="paletteResults" role="listbox"></div>
+        <div class="palette-footer">
+          <span><kbd>&uarr;</kbd><kbd>&darr;</kbd> navigate</span>
+          <span><kbd>&crarr;</kbd> select</span>
+          <span><kbd>ESC</kbd> close</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Delete Confirmation Overlay ────────────────────── -->
+    <div class="modal-overlay hidden" id="deleteOverlay" role="dialog" aria-modal="true" aria-label="Delete confirmation">
+      <div class="modal">
+        <div class="modal-header danger">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <h3>Delete Project</h3>
+        </div>
+        <div class="modal-body">
+          <p class="modal-project-name" id="deleteProjectName"></p>
+          <p class="modal-project-dir mono" id="deleteProjectDir"></p>
+          <p class="modal-project-date" id="deleteProjectDate"></p>
+          <p class="modal-warning">This action cannot be undone.</p>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="cancelDelete">Cancel</button>
+          <button class="btn btn-danger" id="confirmDelete">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+            </svg>
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Toast Container ────────────────────────────────── -->
+    <div class="toast-container" id="toastContainer" aria-live="polite" aria-relevant="additions"></div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
