@@ -1,39 +1,102 @@
-# Repxray
+<p align="center">
+  <img src="https://img.shields.io/npm/v/repxray?color=blue&logo=npm&label=repxray" alt="npm version">
+  <img src="https://img.shields.io/npm/dm/repxray?color=blue&logo=npm" alt="npm downloads">
+  <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="MIT License">
+  <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs welcome">
+</p>
 
-> 🌐 [Read in English](README.en.md)
+<h1 align="center">🕵️ Repxray</h1>
+<p align="center">
+  <b>Scan project folder → dapetin metadata → simpen ke database.</b><br>
+  CLI, Web Dashboard, Terminal UI — tinggal pilih.
+</p>
 
-Scan project folder, dapetin metadata (tech stack, features, structure), simpen ke database. Ada CLI, Web Dashboard, Terminal UI — tinggal pilih.
+<p align="center">
+  <a href="https://www.npmjs.com/package/repxray">📦 npm</a> •
+  <a href="#-demo">🎬 Demo</a> •
+  <a href="#-cara-pake">🚀 Mulai</a> •
+  <a href="#-cli-commands">📋 Commands</a> •
+  <a href="README.en.md">🌐 English</a>
+</p>
 
 ---
 
-## Yang Bisa Dilakuin
+## 🎬 Demo
 
-- **Scan otomatis** — Baca `package.json`, `README.md`, `requirements.txt`, dll. Tau tech stack, framework, feature, status
-- **Batch scan** — Scan semua sub-folder pake `scan --all`
-- **Web Dashboard** — Browser UI buat liat, cari, export, hapus project
-- **Terminal UI** — Navigasi pake arrow keys, export JSON/MD sekali pencet
-- **`repxray go`** — Satu perintah langsung start server + scan + upload
-- **AI Agent ready** — Bisa pake AI assistant buat scan project (lengkap di `AGENTS.md`)
+```bash
+$ npx repxray go ./test-sample
+
+╭──────────────────────────────────────────────────────────╮
+│                     🕵️  Repxray                          │
+│         Project Intelligence System v1.0.1                │
+╰──────────────────────────────────────────────────────────╯
+
+[Repxray] Checking server...
+[Repxray] Server not running. Starting server...
+  Waiting for server..... ready! ✅
+
+[Repxray] Scanning folder: ./test-sample
+
+  📁 Name: test-sample
+  ✅ Status: Active
+  🛠️  Stack: express, react, tailwindcss, prisma
+  ⭐ Features: 5 found
+
+[Repxray] Uploading to server...
+[Repxray] Done! Project ID: 1 🎉
+
+$ repxray list
+
+  ┌─────┬────────────────┬──────────────────────────┬──────────┐
+  │ ID  │ Name           │ Stack                    │ Status   │
+  ├─────┼────────────────┼──────────────────────────┼──────────┤
+  │ 1   │ test-sample    │ express, react, ...      │ Active   │
+  └─────┴────────────────┴──────────────────────────┴──────────┘
+
+$ repxray view 1
+
+  📁 test-sample
+  ├── 📝 Description: Sample project for Repxray
+  ├── 🛠️  Stack: express, react, tailwindcss, prisma
+  ├── ⭐ Features: Authentication, Database, API, UI, Testing
+  ├── 📂 Structure: src/, public/, prisma/, tests/
+  └── 📅 Scanned: 2 minutes ago
+```
+
+> 💡 **Mau bikin demo GIF kaya gini?** Pake [ScreenToGif](https://www.screentogif.com/) di Windows — tinggal record terminal lo & export ke GIF. Gampang!
 
 ---
 
-## Cara Pake
+## ✨ Fitur
 
-### Paling gampang — tinggal jalanin
+| Fitur | Description |
+|-------|-------------|
+| 🔍 **Auto Scan** | Baca `package.json`, `README.md`, `requirements.txt`, dll. Tau tech stack, framework, feature |
+| 📦 **Batch Scan** | Scan semua sub-folder pake `scan --all` |
+| 🌐 **Web Dashboard** | Browser UI buat liat, cari, export, hapus project |
+| 🎛️ **Terminal UI** | Navigasi pake arrow keys, export JSON/MD sekali pencet |
+| ⚡ **`repxray go`** | Satu perintah langsung start server + scan + upload |
+| 🤖 **AI Agent Ready** | Bisa pake AI assistant buat scan project (lengkap di `AGENTS.md`) |
+
+---
+
+## 🚀 Cara Pake
+
+### ⚡ Paling cepet — langsung dari npm
 ```bash
 npx repxray go ./test-sample
 # Download → start server → scan → upload → selesai
 ```
 
-### Install global (biar gak perlu download ulang)
+### 📦 Install global (biar gak perlu download ulang)
 ```bash
 npm install -g repxray
 repxray go ./test-sample
 ```
 
-### Development (clone repo)
+### 🔧 Development (clone repo)
 ```bash
-git clone <repo-url>
+git clone https://github.com/kandarlubis31/repxray.git
 cd repxray
 pnpm install
 pnpm run link
@@ -41,52 +104,53 @@ pnpm server
 repxray scan ./test-sample
 ```
 
-Buka `http://localhost:7890` buat Web Dashboard, atau `repxray ui` buat Terminal UI.
+Buka **http://localhost:7890** buat Web Dashboard, atau `repxray ui` buat Terminal UI.
 
 ---
 
-## Cara Kerja
+## 🔁 Cara Kerja
 
 ```
-[Target Repo] → repxray scan → [Repxray Server] → [SQLite Database]
-                                    ↑
-                              localhost:7890
+┌─────────────┐     ┌──────────────┐     ┌──────────────────┐
+│ Target Repo │ ──→ │ repxray scan │ ──→ │ Repxray Server   │
+│ ./project   │     │ (CLI)        │     │ localhost:7890   │
+└─────────────┘     └──────────────┘     └────────┬─────────┘
+                                                   │
+                                            ┌──────▼──────┐
+                                            │   SQLite DB  │
+                                            │ repxray.sqlite│
+                                            └─────────────┘
 ```
 
-### Struktur Folder
+### 📂 Struktur Project
 
 ```
 repxray/
-├── cli/
-│   ├── src/               # CLI commands (scan, view, list, go, dll)
-│   │   ├── index.js       # Entry point
-│   │   ├── scanner.js     # Project scanner
-│   │   ├── formatter.js   # JSON/MD formatter
-│   │   ├── uploader.js    # HTTP uploader
-│   │   └── ui.js          # Terminal UI (Ink + React)
-│   ├── server/            # Express API server
-│   │   ├── public/        # Web Dashboard (HTML/CSS/JS)
+├── cli/                     # Single npm package (repxray)
+│   ├── src/                 # CLI commands
+│   │   ├── index.js         # Entry point
+│   │   ├── scanner.js       # Project scanner
+│   │   ├── formatter.js     # JSON/MD formatter
+│   │   ├── uploader.js      # HTTP uploader
+│   │   └── ui.js            # Terminal UI (Ink + React)
+│   ├── server/              # Express API server
+│   │   ├── public/          # Web Dashboard (HTML/CSS/JS)
 │   │   └── src/
-│   │       ├── server.js  # Entry point
+│   │       ├── server.js    # Entry point
 │   │       ├── database.js
 │   │       ├── scanner.js
-│   │       ├── routes/projects.js
-│   │       └── utils/validator.js
-│   ├── database/          # SQLite database
-│   │   └── repxray.sqlite
-│   └── package.json       # Single npm package (repxray)
-├── package.json           # Workspace root
-├── AGENTS.md              # Buat AI assistant
-└── README.md
+│   │       └── routes/projects.js
+│   └── database/            # SQLite database
+└── package.json             # Workspace root
 ```
 
 ---
 
-## CLI Commands
+## 📋 CLI Commands
 
 | Command | Description |
 |---------|-------------|
-| `repxray go <folder>` | **Auto start server + scan**, satu perintah aja |
+| `repxray go <folder>` | ⚡ **Auto start server + scan**, satu perintah aja |
 | `repxray scan <folder>` | Scan project + upload ke database |
 | `repxray scan --all <dir>` | Scan semua sub-folder |
 | `repxray list` | Lihat semua project |
@@ -96,10 +160,10 @@ repxray/
 | `repxray export md` | Export semua project sebagai Markdown |
 | `repxray upload <file>` | Upload file JSON |
 | `repxray delete <id>` | Hapus project |
-| `repxray ui` | Terminal UI interaktif |
+| `repxray ui` | 🎛️ Terminal UI interaktif |
 | `repxray --help` | Tampilkan help |
 
-### Contoh
+### Contoh Pemakaian
 
 ```bash
 # Paling gampang — auto server + scan
@@ -108,57 +172,21 @@ repxray go ./my-project
 # Scan aja (server harus udah jalan)
 repxray scan ./my-project
 
-# Batch scan
+# Batch scan semua sub-folder
 repxray scan --all ./projects/
 
 # Cari project pake React
 repxray search react
 
-# Export semua
+# Export semua project sebagai Markdown
 repxray export md
 ```
 
-### Output
-
-```bash
-$ repxray scan ./test-sample
-
-[Repxray] Scanning folder: ./test-sample
-
-  Name: test-sample
-  Status: Active
-  Stack: express, react, tailwindcss, prisma
-  Features: 5 found
-
-[Repxray] Uploading to server...
-[Repxray] Done! Project ID: 1
-```
-
-### `repxray go` — Auto Server + Scan
-
-```bash
-$ repxray go ./test-sample
-
-[Repxray] Checking server...
-[Repxray] Server not running. Starting server...
-  Waiting for server...
-[Repxray] Server is ready!
-
-[Repxray] Scanning folder: ./test-sample
-  ...
-[Repxray] Done! Project ID: 1
-```
-
-Cocok buat:
-- **Pertama kali** — langsung jalan, gak perlu setup manual
-- **Demo cepet** — tunjukkin Repxray dalam 5 detik
-- **Main-main** — scan, catet ID, selesai
-
 ---
 
-## Terminal UI
+## 🎛️ Terminal UI
 
-```
+```bash
 repxray ui
 ```
 
@@ -174,15 +202,15 @@ repxray ui
 
 ---
 
-## Web Dashboard
+## 🌐 Web Dashboard
 
-Buka `http://localhost:7890` pas server jalan.
+Buka **http://localhost:7890** pas server jalan.
 
-- Daftar project dengan search + filter
-- Detail: status, tech stack, features, timestamps
-- Export: copy JSON/Markdown ke clipboard
-- Scan langsung dari browser
-- Delete dengan konfirmasi
+- 📋 Daftar project dengan search + filter
+- 📄 Detail: status, tech stack, features, timestamps
+- 📤 Export: copy JSON/Markdown ke clipboard
+- 🔍 Scan langsung dari browser
+- 🗑️ Delete dengan konfirmasi
 
 ### API Endpoints
 
@@ -200,20 +228,20 @@ Buka `http://localhost:7890` pas server jalan.
 
 ---
 
-## AI Agent
+## 🤖 AI Agent
 
-File `AGENTS.md` berisi instruksi buat AI coding assistant (Codebuff, Cursor, Copilot, dll).
+File [`AGENTS.md`](AGENTS.md) berisi instruksi buat AI coding assistant (Codebuff, Cursor, Copilot, dll).
 
-Tinggal bilang:
-- *"Bantu gw buat ringkasan project ini pake repxray"*
-- *"Simpen project ini ke database repxray"*
-- *"Scan project ini pake repxray"*
+Tinggal bilang ke agent lo:
+> *"Bantu gw buat ringkasan project ini pake repxray"*
+> *"Simpen project ini ke database repxray"*
+> *"Scan project ini pake repxray"*
 
-Agent bakal jalanin `repxray scan` dan kasih tau hasilnya.
+Agent bakal otomatis jalanin `repxray scan` dan kasih tau hasilnya.
 
 ---
 
-## Environment Variables
+## ⚙️ Environment Variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
@@ -221,15 +249,23 @@ Agent bakal jalanin `repxray scan` dan kasih tau hasilnya.
 | `API_URL` | `http://localhost:7890` | URL server buat koneksi CLI |
 | `DATABASE_PATH` | `./cli/database/repxray.sqlite` | Lokasi database SQLite |
 
-Kalo port 7890 kepake, server otomatis coba 7891, 7892, ... 7899.
-Port yang kepake bakal dipake otomatis sama `repxray go`.
+> Kalo port 7890 kepake, server otomatis coba 7891, 7892, ... 7899. Port yang kepake bakal dipake otomatis sama `repxray go`.
 
 ---
 
-## Tech Stack
+## 🛠️ Tech Stack
 
-- **Backend:** Node.js, Express.js
-- **Database:** SQLite (sql.js)
-- **CLI:** Node.js, Ink + React (TUI)
-- **Web UI:** Vanilla HTML/CSS/JS (no build)
-- **Lisensi:** MIT
+| Bagian | Teknologi |
+|--------|-----------|
+| 🖥️ **Backend** | Node.js, Express.js |
+| 🗄️ **Database** | SQLite (sql.js) |
+| ⌨️ **CLI** | Node.js, Ink + React (TUI) |
+| 🎨 **Web UI** | Vanilla HTML/CSS/JS (no build) |
+| 📜 **Lisensi** | MIT |
+
+---
+
+<p align="center">
+  <b>Made with ❤️ by <a href="https://github.com/kandarlubis31">Kandar Lubis</a></b><br>
+  <sub>Dibuat pake 🥤 + ☕ + 💻</sub>
+</p>

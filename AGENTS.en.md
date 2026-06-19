@@ -1,6 +1,11 @@
 # Repxray — AI Agent Instructions
 
+[![npm version](https://img.shields.io/npm/v/repxray?color=blue&logo=npm)](https://www.npmjs.com/package/repxray)
+[![npm downloads](https://img.shields.io/npm/dm/repxray?color=blue&logo=npm)](https://www.npmjs.com/package/repxray)
+
 Repxray is a project intelligence system. Scans a folder, extracts metadata (name, tech stack, features, structure), generates a summary, uploads to database.
+
+📦 **[View on npm](https://www.npmjs.com/package/repxray)**
 
 ---
 

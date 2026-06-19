@@ -5,12 +5,12 @@
   "description": "Workspace root for Repxray — project intelligence system",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/<your-username>/repxray.git"
+    "url": "git+https://github.com/kandarlubis31/repxray.git"
   },
   "bugs": {
-    "url": "https://github.com/<your-username>/repxray/issues"
+    "url": "https://github.com/kandarlubis31/repxray/issues"
   },
-  "homepage": "https://github.com/<your-username>/repxray#readme",
+  "homepage": "https://github.com/kandarlubis31/repxray#readme",
   "scripts": {
     "server": "node cli/server/src/server.js",
     "cli": "node cli/src/index.js",
