@@ -8,6 +8,7 @@ const projectsRouter = require('./routes/projects');
 const { scanProject, listSubdirectories } = require('./scanner');
 const { sanitizeString, sanitizeArray } = require('./utils/validator');
 const db = require('./database');
+const os = require('os');
 
 const app = express();
 
@@ -215,6 +216,104 @@ app.post('/api/scan/all', async (req, res) => {
   } catch (err) {
     console.error('Batch scan error:', err.message);
     res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ── GitHub scan endpoint ──────────────────────────────────
+app.post('/api/scan/github', async (req, res) => {
+  const url = req.body.url;
+  if (!url || typeof url !== 'string' || url.trim() === '') {
+    return res.status(400).json({ success: false, error: 'url is required' });
+  }
+
+  // Parse GitHub URL (support: https://github.com/owner/repo, owner/repo)
+  let owner, repo;
+  const urlMatch = url.trim().match(/(?:https?:\/\/)?(?:www\.)?github\.com\/([^\/]+)\/([^\/]+?)(?:\.git)?$/);
+  if (urlMatch) {
+    owner = urlMatch[1];
+    repo = urlMatch[2];
+  } else {
+    const shorthandMatch = url.trim().match(/^([a-zA-Z0-9._-]+)\/([a-zA-Z0-9._-]+)$/);
+    if (shorthandMatch) {
+      owner = shorthandMatch[1];
+      repo = shorthandMatch[2];
+    } else {
+      return res.status(400).json({ success: false, error: 'Invalid GitHub URL. Use: https://github.com/owner/repo or owner/repo' });
+    }
+  }
+
+  const cloneUrl = 'https://github.com/' + owner + '/' + repo + '.git';
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'repxray-'));
+  const destPath = path.join(tmpDir, repo);
+
+  try {
+    // Clone repo
+    console.log('[Repxray] Cloning ' + owner + '/' + repo + '...');
+    await new Promise((resolve, reject) => {
+      const { spawn } = require('child_process');
+      const proc = spawn('git', ['clone', '--depth', '1', cloneUrl, destPath], {
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
+      let stderr = '';
+      proc.stdout.on('data', () => {});
+      proc.stderr.on('data', (data) => { stderr += data.toString(); });
+      proc.on('close', (code) => {
+        if (code === 0) resolve();
+        else reject(new Error('Git clone failed (exit ' + code + '): ' + stderr.trim()));
+      });
+      proc.on('error', (err) => reject(new Error('Failed to start git: ' + err.message)));
+    });
+    console.log('[Repxray] Clone complete!');
+
+    // Scan the cloned repo
+    const scanned = scanProject(destPath);
+    scanned.name = repo + ' (gh:' + owner + ')';
+
+    // Upsert into database
+    await db.getDatabase();
+    const existing = db.prepareGetRaw('SELECT id FROM projects WHERE directory = ?', [scanned.directory]);
+
+    const params = {
+      $name: sanitizeString(scanned.name),
+      $description: sanitizeString(scanned.description),
+      $stack: sanitizeArray(scanned.stack),
+      $status: sanitizeString(scanned.status),
+      $progress: sanitizeString(scanned.progress),
+      $features: sanitizeArray(scanned.features),
+      $directory: sanitizeString(scanned.directory),
+      $summary_json: scanned.summary_json || '{}',
+      $summary_md: sanitizeString(scanned.summary_md),
+    };
+
+    let id;
+    if (existing) {
+      db.prepareRun(
+        `UPDATE projects SET
+          name = $name, description = $description, stack = $stack,
+          status = $status, progress = $progress, features = $features,
+          summary_json = $summary_json, summary_md = $summary_md,
+          updated_at = datetime('now')
+        WHERE directory = $directory`,
+        params
+      );
+      id = existing.id;
+    } else {
+      db.prepareRun(
+        `INSERT INTO projects (name, description, stack, status, progress, features, directory, summary_json, summary_md)
+        VALUES ($name, $description, $stack, $status, $progress, $features, $directory, $summary_json, $summary_md)`,
+        params
+      );
+      const row = db.prepareGetRaw('SELECT id FROM projects WHERE directory = ?', [scanned.directory]);
+      id = row ? row.id : null;
+    }
+
+    res.json({ success: true, id: id, name: scanned.name, github_url: 'https://github.com/' + owner + '/' + repo });
+  } catch (err) {
+    console.error('GitHub scan error:', err.message);
+    res.status(500).json({ success: false, error: err.message });
+  } finally {
+    // Cleanup temp directory
+    try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch (e) {}
   }
 });
 
