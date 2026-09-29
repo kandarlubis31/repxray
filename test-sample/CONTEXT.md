@@ -1,15 +1,15 @@
-# test-sample
+# test-sample — Project Context
 
-## Tentang Project
-
+## Ringkasan
 A sample Express.js application used for testing the Repxray scanner.
 
-## Tech Stack
+> *Context ini dibuat otomatis oleh `catalog/generate_contexts.py`. Isi ulang
+> bagian ringkasan / arsitektur secara manual jika butuh detail lebih dalam.*
 
+## Tech Stack
 Node.js; deps: express, react, tailwindcss, prisma; dev: jest, typescript
 
 ## Struktur Utama
-
 ```
 public/
 src/
@@ -18,15 +18,10 @@ package.json
 README.md
 ```
 
-## Menjalankan
-
+## Cara Menjalankan
 - `npm run start`
 - `npm run test`
 
 ---
 
 *Generated: 2026-08-08 · Path: nodeJS\repxray\test-sample*
-
----
-
-Lihat `CONTEXT.md` di folder ini untuk detail arsitektur.

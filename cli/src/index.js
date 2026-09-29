@@ -6,6 +6,7 @@ const { spawn } = require('child_process');
 const { scanProject, IGNORE_DIRS } = require('./scanner');
 const { generateSummaryJson, generateSummaryMd } = require('./formatter');
 const { uploadProject } = require('./uploader');
+const { parseGitHubUrl, cloneRepo, cleanupTempDir } = require('./github');
 
 var API_URL = process.env.API_URL || 'http://localhost:7890';
 const REPXRAY_ROOT = path.resolve(__dirname, '..');
@@ -73,6 +74,14 @@ async function main() {
   } else if (command === 'ui' || command === 'tui') {
     const { launchUI } = await import('./ui.js');
     await launchUI();
+  } else if (command === 'gh' || command === 'github') {
+    if (!target) {
+      console.error('Error: Please specify a GitHub repository URL.');
+      console.error('Usage: npx repxray gh <github-url>');
+      console.error('       npx repxray gh owner/repo');
+      process.exit(1);
+    }
+    await scanGitHub(target);
   } else if (command === 'go') {
     if (!target) {
       console.error('Error: Please specify a folder to scan.');
@@ -475,6 +484,109 @@ function handleError(err) {
   process.exit(1);
 }
 
+async function scanGitHub(input) {
+  try {
+    const { owner, repo } = parseGitHubUrl(input);
+    const repoFull = owner + '/' + repo;
+
+    console.log('[Repxray] Scanning GitHub repository: ' + repoFull);
+    console.log('');
+
+    // Ensure server is running (reuse go logic)
+    var serverRunning = false;
+    try {
+      var healthRes = await fetch(API_URL.replace(/\/+$/, '') + '/api/health', { signal: AbortSignal.timeout(3000) });
+      serverRunning = healthRes.ok;
+    } catch (e) {
+      serverRunning = false;
+    }
+
+    if (!serverRunning) {
+      console.log('[Repxray] Server not running. Starting server...');
+      const { spawn } = require('child_process');
+      var serverProcess = spawn('node', [path.join(REPXRAY_ROOT, 'server/src/server.js')], {
+        stdio: ['ignore', 'pipe', 'ignore'],
+        detached: true,
+        env: { ...process.env },
+      });
+
+      var detectedPort = null;
+      var stdoutBuffer = '';
+      serverProcess.stdout.on('data', function (data) {
+        stdoutBuffer += data.toString();
+        var match = stdoutBuffer.match(/\[PORT\]\s+(\d+)/);
+        if (match) detectedPort = parseInt(match[1], 10);
+      });
+
+      function getServerUrl() {
+        return detectedPort ? 'http://localhost:' + detectedPort : API_URL;
+      }
+
+      var ready = false;
+      for (var i = 0; i < 15; i++) {
+        process.stdout.write('  Waiting for server' + '.'.repeat(i + 1) + '\r');
+        try {
+          var check = await fetch(getServerUrl().replace(/\/+$/, '') + '/api/health', { signal: AbortSignal.timeout(2000) });
+          if (check.ok) { ready = true; break; }
+        } catch (e) {}
+        await new Promise(function (r) { return setTimeout(r, 1000); });
+      }
+
+      process.stdout.write('                                    \r');
+
+      if (!ready) {
+        try { serverProcess.kill(); } catch (e) {}
+        console.error('[Repxray] Failed to start server.');
+        process.exit(1);
+      }
+
+      if (detectedPort) API_URL = 'http://localhost:' + detectedPort;
+      serverProcess.unref();
+      console.log('[Repxray] Server is ready! (port ' + (detectedPort || 7890) + ')');
+      console.log('');
+    } else {
+      console.log('[Repxray] Server is already running.');
+      console.log('');
+    }
+
+    // Clone repo to temp directory
+    const tmpDir = fs.mkdtempSync(path.join(require('os').tmpdir(), 'repxray-'));
+    try {
+      const clonePath = await cloneRepo(owner, repo, tmpDir);
+
+      // Scan the cloned repo
+      const scanned = scanProject(clonePath);
+      // Override name to show it's from GitHub
+      scanned.name = repo + ' (gh:' + owner + ')';
+
+      console.log('');
+      console.log('  ' + scanned.name);
+      console.log('  Status: ' + scanned.status);
+      console.log('  Stack: ' + scanned.stack.slice(0, 5).join(', ') + (scanned.stack.length > 5 ? '...' : ''));
+      console.log('  Features: ' + scanned.features.length + ' found');
+      console.log('');
+
+      const summaryJson = generateSummaryJson(scanned);
+      const summaryMd = generateSummaryMd(scanned);
+      summaryJson.github_url = 'https://github.com/' + owner + '/' + repo;
+
+      const projectData = {
+        ...scanned,
+        summary_json: summaryJson,
+        summary_md: summaryMd,
+      };
+
+      console.log('[Repxray] Uploading to server...');
+      const result = await uploadProject(API_URL, projectData);
+      console.log('[Repxray] Done! Project ID: ' + result.id + ' 🎉');
+    } finally {
+      cleanupTempDir(tmpDir);
+    }
+  } catch (err) {
+    handleError(err);
+  }
+}
+
 function printHelp() {
   console.log(`
 Repxray CLI - Personal Project Intelligence
@@ -482,6 +594,7 @@ Repxray CLI - Personal Project Intelligence
 Usage:
   npx repxray scan <folder>      Scan a project folder and upload to server
   npx repxray scan --all <dir>   Scan all subdirectories in a parent folder
+  npx repxray gh <github-url>    Scan a GitHub repository (clones, scans, uploads)
   npx repxray view <id>          View project details
   npx repxray list               List all projects
   npx repxray search <keyword>   Search projects by name, stack, or description
@@ -499,6 +612,8 @@ Environment:
 
 Examples:
   npx repxray go ./my-project
+  npx repxray gh user/repo
+  npx repxray gh https://github.com/user/repo
   npx repxray scan ./my-project
   npx repxray ui
   npx repxray view 1

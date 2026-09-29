@@ -27,6 +27,7 @@ var ICONS = {
   edit:    '<path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"/><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"/>',
   sort:    '<path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/>',
   hash:    '<line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/>',
+  github:  '<path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>',
 };
 
 function icon(name, size) {
@@ -131,6 +132,19 @@ var API = {
     }
     return res.json();
   },
+
+  async scanGitHubRepo(url) {
+    var res = await fetch('/api/scan/github', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: url }),
+    });
+    if (!res.ok) {
+      var err = await res.json();
+      throw new Error(err.error || 'GitHub scan failed');
+    }
+    return res.json();
+  },
 };
 
 /* ─── DOM References ─────────────────────────────────────── */
@@ -152,7 +166,11 @@ var dom = {
   searchCommand: $('searchCommand'),
 
   // Scan
+  scanTabs: $('scanTabs'),
+  scanInputGroup: $('scanInputGroup'),
+  scanInputIcon: $('scanInputIcon'),
   scanPath: $('scanPath'),
+  scanGitHubBtnBar: $('scanGitHubBtnBar'),
   scanBtn: $('scanBtn'),
   scanAllBtn: $('scanAllBtn'),
   scanBtnBar: $('scanBtnBar'),
@@ -646,6 +664,7 @@ function updatePaletteResults() {
   var actionItems = [
     { type: 'action', action: 'scan', title: 'Scan a directory', desc: 'Start scanning a project folder' },
     { type: 'action', action: 'scan-all', title: 'Scan all subdirectories', desc: 'Batch scan a parent folder' },
+    { type: 'action', action: 'scan-github', title: 'Scan GitHub repo', desc: 'Clone and scan a GitHub repository' },
     { type: 'action', action: 'refresh', title: 'Refresh projects', desc: 'Reload the project list' },
   ];
 
@@ -696,6 +715,9 @@ function executePaletteItem(index) {
     dom.scanPath.scrollIntoView({ behavior: 'smooth' });
   } else if (item.action === 'scan-all') {
     promptScanAll();
+  } else if (item.action === 'scan-github') {
+    switchScanMode('github');
+    dom.scanPath.focus();
   } else if (item.action === 'refresh') {
     loadProjects();
   }
@@ -818,12 +840,52 @@ dom.clearSearch.addEventListener('click', function () {
   renderProjectList();
 });
 
+/* ─── Scan Mode Tabs ─────────────────────────────────────── */
+var scanMode = 'path'; // 'path' | 'github'
+
+function switchScanMode(mode) {
+  scanMode = mode;
+
+  // Update tab styles
+  dom.scanTabs.querySelectorAll('.scan-tab').forEach(function (tab) {
+    tab.classList.toggle('active', tab.dataset.mode === mode);
+  });
+
+  if (mode === 'github') {
+    dom.scanInputIcon.innerHTML = icon('github', 16).replace(/^<svg[^>]*>|'<\/svg>$/g, '');
+    dom.scanPath.placeholder = 'Enter GitHub URL — e.g. user/repo or full URL';
+    dom.scanBtnBar.classList.add('hidden');
+    dom.scanAllBtnBar.classList.add('hidden');
+    dom.scanGitHubBtnBar.classList.remove('hidden');
+  } else {
+    dom.scanInputIcon.innerHTML = icon('folder', 16).replace(/^<svg[^>]*>|'<\/svg>$/g, '');
+    dom.scanPath.placeholder = 'Enter path to scan — e.g. ./my-project or /absolute/path';
+    dom.scanBtnBar.classList.remove('hidden');
+    dom.scanAllBtnBar.classList.remove('hidden');
+    dom.scanGitHubBtnBar.classList.add('hidden');
+  }
+}
+
+dom.scanTabs.addEventListener('click', function (e) {
+  var tab = e.target.closest('.scan-tab');
+  if (tab) {
+    switchScanMode(tab.dataset.mode);
+    dom.scanPath.value = '';
+    dom.scanPath.focus();
+  }
+});
+
 // ── Scan Buttons (header + toolbar) ──
 function handleScan() {
   var path = dom.scanPath.value.trim();
   if (!path) {
-    showToast('Please enter a path to scan', 'error');
+    showToast('Please enter a ' + (scanMode === 'github' ? 'GitHub URL' : 'path') + ' to scan', 'error');
     dom.scanPath.focus();
+    return;
+  }
+
+  if (scanMode === 'github') {
+    handleGitHubScan();
     return;
   }
 
@@ -851,6 +913,40 @@ function handleScan() {
     isScanning = false;
     dom.scanBtn.disabled = false;
     dom.scanBtnBar.disabled = false;
+    startAutoRefresh();
+  });
+}
+
+function handleGitHubScan() {
+  var url = dom.scanPath.value.trim();
+  if (!url) {
+    showToast('Please enter a GitHub URL', 'error');
+    dom.scanPath.focus();
+    return;
+  }
+
+  isScanning = true;
+  stopAutoRefresh();
+  dom.scanGitHubBtnBar.disabled = true;
+
+  var toastId = showScanToast(url);
+
+  API.scanGitHubRepo(url).then(function (result) {
+    dismissScanToast();
+    showToast('"' + (result.name || 'Unnamed') + '" cloned & scanned!', 'success');
+    dom.scanPath.value = '';
+    return loadProjects().then(function () {
+      if (result.id) {
+        state.selectedId = result.id;
+        renderDetail();
+      }
+    });
+  }).catch(function (err) {
+    dismissScanToast();
+    showToast('GitHub scan failed: ' + err.message, 'error');
+  }).then(function () {
+    isScanning = false;
+    dom.scanGitHubBtnBar.disabled = false;
     startAutoRefresh();
   });
 }
@@ -900,6 +996,7 @@ dom.scanPath.addEventListener('keydown', function (e) {
 });
 dom.scanAllBtn.addEventListener('click', handleScanAll);
 dom.scanAllBtnBar.addEventListener('click', handleScanAll);
+dom.scanGitHubBtnBar.addEventListener('click', handleGitHubScan);
 
 // ── Detail Actions ──
 var _copyJsonOriginal = '';
