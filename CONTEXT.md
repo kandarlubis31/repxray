@@ -1,36 +1,43 @@
 # repxray — Project Context
 
 ## Ringkasan
-🕵️ Repxray Scan project folder → dapetin metadata → simpen ke database. CLI, Web Dashboard, Terminal UI — tinggal pilih. 📦 npm • 🎬 Demo • 🚀 Mulai • 📋 Commands • 🌐 E
 
-> *Context ini dibuat otomatis oleh `catalog/generate_contexts.py`. Isi ulang
-> bagian ringkasan / arsitektur secara manual jika butuh detail lebih dalam.*
+Repxray memindai folder proyek, mengekstrak metadatanya (nama, tech stack, deskripsi), lalu
+menyimpannya ke basis data lokal yang bisa ditelusuri. Berguna ketika folder proyek menumpuk di satu
+drive dan tidak lagi jelas isinya apa.
 
-## Tech Stack
-Node.js
+Dirilis di npm sebagai `repxray`.
 
-## Struktur Utama
+## Alur
+
 ```
-.github/
-cli/
-test-sample/
-.env
-.env.example
-.gitignore
-AGENTS.en.md
-AGENTS.md
-CONTEXT.md
-LICENSE
-package.json
-pnpm-lock.yaml
+folder target → repxray scan → server Repxray (SQLite) → CLI / dashboard web / TUI
+```
+
+Pemindaian dan penyajian dipisah: pemindaian menulis ke basis data, sedangkan CLI, dashboard, dan TUI
+hanya membaca. Karena itu satu hasil scan bisa dilihat dari antarmuka mana pun tanpa memindai ulang.
+
+## Struktur
+
+```
+cli/               Paket yang dipublikasikan: src/ (perintah), server/ (dashboard), database/
+cli/docs/          prd.md dan adr/ — keputusan desain
+AGENTS.md          Panduan kerja agen di repo ini
 pnpm-workspace.yaml
-README.en.md
-README.md
 ```
 
-## Cara Menjalankan
-- `npm install && npm start`
+## Menjalankan
 
----
+```bash
+pnpm install
+node cli/src/index.js --help
+```
 
-*Generated: 2026-08-08 · Path: nodeJS\repxray*
+Atau lewat npm: `npx repxray`.
+
+## Catatan
+
+- Basis data (`cli/database/repxray.sqlite`) bersifat lokal per mesin; jangan di-commit.
+- Metadata diturunkan dari isi folder (mis. `package.json`, struktur berkas). Proyek tanpa penanda
+  stack akan tercatat sebagai "tidak terdeteksi", bukan ditebak.
+- Keputusan arsitektur dicatat di `cli/docs/adr/`; baca sebelum mengubah bentuk data atau perintah.
