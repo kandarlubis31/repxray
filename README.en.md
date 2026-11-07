@@ -266,8 +266,7 @@ The agent will run `repxray scan` and report back.
 ---
 
 <p align="center">
- <b>Made with by <a href="https://github.com/kandarlubis31">Kandar Lubis</a></b><br>
- <sub>Powered by + + </sub>
+ <b>Made by <a href="https://github.com/kandarlubis31">Kandar Lubis</a></b><br>
 </p>
 
 ---
