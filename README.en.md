@@ -1,27 +1,27 @@
 <p align="center">
-  <img src="https://img.shields.io/npm/v/repxray?color=blue&logo=npm&label=repxray" alt="npm version">
-  <img src="https://img.shields.io/npm/dm/repxray?color=blue&logo=npm" alt="npm downloads">
-  <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="MIT License">
-  <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs welcome">
+ <img src="https://img.shields.io/npm/v/repxray?color=blue&logo=npm&label=repxray" alt="npm version">
+ <img src="https://img.shields.io/npm/dm/repxray?color=blue&logo=npm" alt="npm downloads">
+ <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="MIT License">
+ <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs welcome">
 </p>
 
-<h1 align="center">🕵️ Repxray</h1>
+<h1 align="center"> Repxray</h1>
 <p align="center">
-  <b>Scan any project folder → extract metadata → save to database.</b><br>
-  CLI, Web Dashboard, Terminal UI — pick whatever works.
+ <b>Scan any project folder → extract metadata → save to database.</b><br>
+ CLI, Web Dashboard, Terminal UI — pick whatever works.
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/repxray">📦 npm</a> •
-  <a href="#-demo">🎬 Demo</a> •
-  <a href="#-quick-start">🚀 Quick Start</a> •
-  <a href="#-cli-commands">📋 Commands</a> •
-  <a href="README.md">🌐 Indonesia</a>
+ <a href="https://www.npmjs.com/package/repxray"> npm</a> •
+ <a href="#-demo"> Demo</a> •
+ <a href="#-quick-start"> Quick Start</a> •
+ <a href="#-cli-commands"> Commands</a> •
+ <a href="README.md"> Indonesia</a>
 </p>
 
 ---
 
-## 🎬 Demo
+## Demo
 
 ```bash
 $ npx repxray go ./test-sample
@@ -63,38 +63,38 @@ $ repxray view 1
   └── 📅 Scanned: 2 minutes ago
 ```
 
-> 💡 **Want to make a demo GIF like this?** Use [ScreenToGif](https://www.screentogif.com/) on Windows — just record your terminal & export to GIF. Easy!
+> **Want to make a demo GIF like this?** Use [ScreenToGif](https://www.screentogif.com/) on Windows — just record your terminal & export to GIF. Easy!
 
 ---
 
-## ✨ Features
+## Features
 
 | Feature | Description |
 |---------|-------------|
-| 🔍 **Auto Scan** | Reads `package.json`, `README.md`, `requirements.txt`, etc. Detects tech stack, frameworks, features |
-| 📦 **Batch Scan** | Scan all sub-folders with `scan --all` |
-| 🌐 **Web Dashboard** | Browser UI to view, search, export, delete projects |
-| 🎛️ **Terminal UI** | Navigate with arrow keys, export JSON/MD with one keypress |
-| ⚡ **`repxray go`** | One command to start server + scan + upload |
-| 🤖 **AI Agent Ready** | AI assistants can scan projects for you (see `AGENTS.md`) |
+|  **Auto Scan** | Reads `package.json`, `README.md`, `requirements.txt`, etc. Detects tech stack, frameworks, features |
+|  **Batch Scan** | Scan all sub-folders with `scan --all` |
+|  **Web Dashboard** | Browser UI to view, search, export, delete projects |
+|  **Terminal UI** | Navigate with arrow keys, export JSON/MD with one keypress |
+|  **`repxray go`** | One command to start server + scan + upload |
+|  **AI Agent Ready** | AI assistants can scan projects for you (see `AGENTS.md`) |
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
-### ⚡ Easiest — straight from npm
+### Easiest — straight from npm
 ```bash
 npx repxray go ./test-sample
 # Downloads → starts server → scans → uploads → done
 ```
 
-### 📦 Global install (skip the download every time)
+### Global install (skip the download every time)
 ```bash
 npm install -g repxray
 repxray go ./test-sample
 ```
 
-### 🔧 Development (clone repo)
+### Development (clone repo)
 ```bash
 git clone https://github.com/kandarlubis31/repxray.git
 cd repxray
@@ -108,7 +108,7 @@ Open **http://localhost:7890** for Web Dashboard, or `repxray ui` for Terminal U
 
 ---
 
-## 🔁 How It Works
+## How It Works
 
 ```
 ┌─────────────┐     ┌──────────────┐     ┌──────────────────┐
@@ -122,7 +122,7 @@ Open **http://localhost:7890** for Web Dashboard, or `repxray ui` for Terminal U
                                             └─────────────┘
 ```
 
-### 📂 Project Structure
+### Project Structure
 
 ```
 repxray/
@@ -146,11 +146,11 @@ repxray/
 
 ---
 
-## 📋 CLI Commands
+## CLI Commands
 
 | Command | Description |
 |---------|-------------|
-| `repxray go <folder>` | ⚡ **Auto start server + scan**, one command |
+| `repxray go <folder>` |  **Auto start server + scan**, one command |
 | `repxray scan <folder>` | Scan project + upload to database |
 | `repxray scan --all <dir>` | Scan all sub-folders |
 | `repxray list` | List all projects |
@@ -160,7 +160,7 @@ repxray/
 | `repxray export md` | Export all projects as Markdown |
 | `repxray upload <file>` | Upload a JSON file |
 | `repxray delete <id>` | Delete a project |
-| `repxray ui` | 🎛️ Interactive Terminal UI |
+| `repxray ui` |  Interactive Terminal UI |
 | `repxray --help` | Show help |
 
 ### Usage Examples
@@ -184,7 +184,7 @@ repxray export md
 
 ---
 
-## 🎛️ Terminal UI
+## Terminal UI
 
 ```bash
 repxray ui
@@ -202,15 +202,15 @@ repxray ui
 
 ---
 
-## 🌐 Web Dashboard
+## Web Dashboard
 
 Open **http://localhost:7890** when the server is running.
 
-- 📋 Project list with search + filter
-- 📄 Details: status, tech stack, features, timestamps
-- 📤 Export: copy JSON/Markdown to clipboard
-- 🔍 Scan directly from your browser
-- 🗑️ Delete with confirmation
+- Project list with search + filter
+- Details: status, tech stack, features, timestamps
+- Export: copy JSON/Markdown to clipboard
+- Scan directly from your browser
+- Delete with confirmation
 
 ### API Endpoints
 
@@ -228,7 +228,7 @@ Open **http://localhost:7890** when the server is running.
 
 ---
 
-## 🤖 AI Agent
+## AI Agent
 
 [`AGENTS.md`](AGENTS.en.md) has instructions for AI coding assistants (Codebuff, Cursor, Copilot, etc.).
 
@@ -241,7 +241,7 @@ The agent will run `repxray scan` and report back.
 
 ---
 
-## ⚙️ Environment Variables
+## Environment Variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
@@ -249,23 +249,29 @@ The agent will run `repxray scan` and report back.
 | `API_URL` | `http://localhost:7890` | Server URL for CLI connection |
 | `DATABASE_PATH` | `./cli/database/repxray.sqlite` | SQLite database path |
 
-> If port 7890 is in use, server tries 7891, 7892, ... 7899. The detected port is automatically used by `repxray go`.
+> If port 7890 is in use, server tries 7891, 7892,... 7899. The detected port is automatically used by `repxray go`.
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| 🖥️ **Backend** | Node.js, Express.js |
-| 🗄️ **Database** | SQLite (sql.js) |
-| ⌨️ **CLI** | Node.js, Ink + React (TUI) |
-| 🎨 **Web UI** | Vanilla HTML/CSS/JS (no build) |
-| 📜 **License** | MIT |
+|  **Backend** | Node.js, Express.js |
+|  **Database** | SQLite (sql.js) |
+|  **CLI** | Node.js, Ink + React (TUI) |
+|  **Web UI** | Vanilla HTML/CSS/JS (no build) |
+|  **License** | MIT |
 
 ---
 
 <p align="center">
-  <b>Made with ❤️ by <a href="https://github.com/kandarlubis31">Kandar Lubis</a></b><br>
-  <sub>Powered by 🥤 + ☕ + 💻</sub>
+ <b>Made with by <a href="https://github.com/kandarlubis31">Kandar Lubis</a></b><br>
+ <sub>Powered by + + </sub>
 </p>
+
+---
+
+## Bahasa Indonesia
+
+**Repxray** memindai folder proyek, mengekstrak metadatanya, dan menyimpan hasilnya ke basis data lokal yang bisa ditelusuri. Tersedia dalam tiga antarmuka: CLI, dashboard web, dan TUI interaktif.
